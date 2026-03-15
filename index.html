@@ -1,0 +1,95 @@
+	<html lang="es">
+	<head>
+		<meta charset="UTF-8"/>
+		<title>Octavo ejercicio</title>
+		<!--Agregar título y sub título a mi visor -->
+		<h1 style= "text-align:center; color:#272AD9 ">Mapa de Luminaria en Ecuador</h1>
+		<h2 style= "text-align:center;">Estudiante: Nestor Caal Suc</h2>
+		
+		<!--API de Leaflet -->
+		 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+		 integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+		 crossorigin=""/>
+		 
+		  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+		 integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+		 crossorigin=""></script>
+		 
+		 <!-- MarkerCluster -->
+		  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/MarkerCluster.css"/>
+		  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/MarkerCluster.Default.css"/>
+		  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/leaflet.markercluster.js"></script>
+
+		
+	</head>
+
+	<body>
+		 <div id="mapa" style= "width:100%; height:500px"></div>
+
+		<script>
+		
+		var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+			attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+			});
+			
+		
+		var ggl= L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+			attribution: '&copy; <a href="http://www.idesa.gob.ar/2021/03/25/mas-mapas-xyz-tiles/">Google Hybrid</a>'
+		});
+		
+		
+		var gglmps= L.tileLayer('https://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}', {
+			attribution: '&copy; <a href="http://www.idesa.gob.ar/2021/03/25/mas-mapas-xyz-tiles/">Google Maps</a>'
+		});
+		
+		
+		var map = L.map('mapa',{
+			center:[-1.387672, -79.669355],
+			zoom: 10,
+			layers:osm});
+		
+		var icono1 =  L.icon({
+			iconUrl: 'https://cdn-icons-png.flaticon.com/512/1464/1464848.png',
+			iconSize:     [40, 55], 
+			iconAnchor:   [22, 60], 
+			popupAnchor:  [-3, -30] 
+			});
+			
+			
+		//Crear el Grupo Cluster
+		var agrupacion = L.markerClusterGroup({
+		chunkedLoading:true})
+		
+		//Agregar una conexión a github de los datos del geojson
+		fetch("https://raw.githubusercontent.com/nestorcaal86/BigData/main/LuminariasCWGCS.geojson")
+		.then((response)=> response.json())
+		.then((datos)=>{ var capa = L.geoJson(datos, {onEachFeature: function (Feature, capa) {
+		capa.bindPopup(	"<b>Alimentador: </b>" + Feature.properties["ALIMENTADO"] + "<br>" +
+							"<b>Codigo de parroquia: </b>" + Feature.properties["PARROQUIA"]);
+		capa.on("mouseover", function (){this.openPopup();});
+		capa.on("mouseout", function () {this.closePopup();});
+		agrupacion.addLayer(capa);
+  }
+});
+		
+
+		map.addLayer(agrupacion);});
+
+		var mapbase = {
+		"Open street map":osm,
+		"Google Hybrid":ggl,
+		"Google Maps":gglmps};
+		
+		L.control.layers(mapbase).addTo(map)
+		
+		
+		</script>
+		
+	</body>
+
+
+
+
+
+
+	</html>
